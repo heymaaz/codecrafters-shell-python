@@ -7,11 +7,22 @@ def main():
 
         # Wait for user input
         command = input()
+        parameter=""
+        if(command.find(" ")>=0):
+            parameter = command[1+command.find(" "):]
+            command = command[0:command.find(" ")]
+        
 
-        if command=="exit 0":
-            exit(0)
 
-        print(f"{command}: command not found")
+        if command=="exit":
+            if parameter:
+                exit(int(parameter))
+            else:
+                exit()
+        elif command=="echo":
+            print(f"{parameter}")
+        else:
+            print(f"{command}: command not found")
 
         
 
