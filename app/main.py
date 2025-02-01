@@ -44,6 +44,11 @@ def completer(text, state):
         else:
             # Path completion
             completer.matches = get_path_completions(text)
+
+         # If no matches found, ring the bell
+        if not completer.matches:
+            sys.stdout.write('\a')
+            sys.stdout.flush()
     
     return completer.matches[state] if state < len(completer.matches) else None
 
@@ -64,6 +69,7 @@ def setup_readline():
     
     # Show all completions if ambiguous
     readline.parse_and_bind("set show-all-if-ambiguous on")
+
 
 def main():
     PATH = os.environ.get("PATH")
