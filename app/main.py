@@ -23,12 +23,17 @@ def main():
                 cmd = parameter.split(" ")[0]
                 paths = PATH.split(":")
                 cmd_path = fileFromPath(cmd,PATH)
-                if cmd in ['echo', 'type', 'exit']:
+                if cmd in ['echo', 'type', 'exit', 'pwd']:
                     print(f"{cmd} is a shell builtin")
                 elif cmd_path is not None:
                     print(f"{cmd} is {cmd_path}")
                 else:
                     print(f"{cmd} not found")
+        elif command=="pwd":
+            if not parameter:
+                print(os.getcwd())
+            else:
+                print("pwd: too many arguments")
         else:
             cmd_file = fileFromPath(command,PATH)
             if cmd_file is not None:
