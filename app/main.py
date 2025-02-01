@@ -53,33 +53,37 @@ def parseInput(command):
     parameter=""
     if(command.find(" ")>=0):
         parameter = command[1+command.find(" "):]
-        parameter = parseDoubleQuotes(parseSingleQuotes(parameter))
+        parameter = parseQuotes(parameter)
         command = command[0:command.find(" ")]
     return command,parameter
 
-def parseSingleQuotes(parameter):
-    inSQ = False
-    retStr=""
-    for i in range(len(parameter)):
-        if parameter[i:i+1]=="\'":
-            inSQ = not inSQ
-            continue
-        if inSQ:
-            retStr = retStr + parameter[i:i+1]
-        else:
-            if parameter[i:i+1] == " " and retStr[len(retStr)-1:] == " ":
-                continue
-            retStr = retStr + parameter[i:i+1]
-    return retStr    
+# def parseSingleQuotes(parameter):
+#     inSQ = False
+#     retStr=""
+#     for i in range(len(parameter)):
+#         if parameter[i:i+1]=="\'":
+#             inSQ = not inSQ
+#             continue
+#         if inSQ:
+#             retStr = retStr + parameter[i:i+1]
+#         else:
+#             if parameter[i:i+1] == " " and retStr[len(retStr)-1:] == " ":
+#                 continue
+#             retStr = retStr + parameter[i:i+1]
+#     return retStr    
 
-def parseDoubleQuotes(parameter):
+def parseQuotes(parameter):
     inDQ = False
+    inSQ = False
     retStr=""
     for i in range(len(parameter)):
         if parameter[i:i+1]=="\"":
             inDQ = not inDQ
             continue
-        if inDQ:
+        if not inDQ and parameter[i:i+1]=="\'":
+            inSQ = not inSQ
+            continue
+        if inDQ or inSQ:
             retStr = retStr + parameter[i:i+1]
         else:
             if parameter[i:i+1] == " " and retStr[len(retStr)-1:] == " ":
