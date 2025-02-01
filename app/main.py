@@ -7,7 +7,9 @@ def main():
         sys.stdout.write("$ ")
 
         # Wait for user input
-        command, parameter = parseInput()
+
+        userInput = input()
+        command, parameter = parseInput(userInput)
         
         if command=="exit":
             if parameter:
@@ -20,28 +22,34 @@ def main():
             if parameter:
                 cmd = parameter.split(" ")[0]
                 paths = PATH.split(":")
-                cmd_path = None
-                for path in paths:
-                    if(os.path.isfile(f"{path}/{cmd}")):
-                        cmd_path = f"{path}/{cmd}"
-                        break
+                cmd_path = fileFromPath(cmd,PATH)
                 if cmd in ['echo', 'type', 'exit']:
                     print(f"{cmd} is a shell builtin")
-                elif cmd_path:
-                    print(f"{cmd} is {path}/{cmd}")
+                elif cmd_path is not None:
+                    print(f"{cmd} is {cmd_path}")
                 else:
                     print(f"{cmd} not found")
         else:
-            print(f"{command}: command not found")
+            cmd_file = fileFromPath(command,PATH)
+            if cmd_file is not None:
+                os.system(userInput)
+            else:
+                print(f"{command}: command not found")
 
-def parseInput():
-    command = input()
+def parseInput(command):
     parameter=""
     if(command.find(" ")>=0):
         parameter = command[1+command.find(" "):]
         command = command[0:command.find(" ")]
     return command,parameter
 
+def fileFromPath(cmd,PATH):
+    cmd_path = None
+    paths = PATH.split(":")
+    for path in paths:
+        if(os.path.isfile(f"{path}/{cmd}")):
+            return f"{path}/{cmd}"
+    return None
 
 if __name__ == "__main__":
     main()
