@@ -31,19 +31,38 @@ def get_path_completions(text):
                 if item.startswith(partial)]
     except OSError:
         return []
+    
+def get_common_prefix(matches):
+    if not matches:
+        return ""
+    shortest = min(matches, key=len)
+    for i, char in enumerate(shortest):
+        if not all(match[i] == char for match in matches):
+            return shortest[:i]
+    return shortest
 
-def display_matches(substitution, matches, longest_match_length):
+def display_matches(text, matches, longest_match_length):
     """Display multiple matches with exactly two spaces between them"""
+    buffer = readline.get_line_buffer()
     if matches:
-        print()  # Move to next line
-        print("  ".join(sorted(matches)))  # Sort and join with exactly two spaces
-        # Redisplay the prompt and current input
-        sys.stdout.write("$ " + readline.get_line_buffer())
-        sys.stdout.flush()
+        matches.sort()
+        common_prefix = get_common_prefix(matches)
+        if common_prefix and common_prefix != text:
+            completer.matches = [common_prefix]
+        elif len(matches) == 1:
+            completer.matches = [matches[0] + " "]
+        else:
+            # Multiple matches without a longer common prefix
+            sys.stdout.write('\a')
+            sys.stdout.flush()
+            print()
+            print("  ".join(matches))
+            print("$ " + buffer, end="")
+            sys.stdout.flush()
+            completer.matches = [text]
 
 def completer(text, state):
     """Enhanced autocomplete function for commands and paths"""
-    buffer = readline.get_line_buffer()
     if state == 0:
         # First time called for this text, build the matches list
         if not text or text[0] not in ['/', '.']:
