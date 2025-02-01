@@ -32,23 +32,44 @@ def get_path_completions(text):
     except OSError:
         return []
 
+def display_matches(substitution, matches, longest_match_length):
+    """Display multiple matches with exactly two spaces between them"""
+    if matches:
+        print()  # Move to next line
+        print("  ".join(sorted(matches)))  # Sort and join with exactly two spaces
+        # Redisplay the prompt and current input
+        sys.stdout.write("$ " + readline.get_line_buffer())
+        sys.stdout.flush()
+
 def completer(text, state):
     """Enhanced autocomplete function for commands and paths"""
+    buffer = readline.get_line_buffer()
     if state == 0:
         # First time called for this text, build the matches list
         if not text or text[0] not in ['/', '.']:
             # Command completion
             commands = get_commands(os.environ.get("PATH", ""))
-            # completer.matches = [cmd for cmd in commands if cmd.startswith(text)]
-            completer.matches = [f"{cmd} " for cmd in commands if cmd.startswith(text)]
+            matches = [cmd for cmd in commands if cmd.startswith(text)]
+            if len(matches) > 1:
+                completer.matches = matches
+                # Ring the bell on multiple matches
+                sys.stdout.write('\a')
+                sys.stdout.flush()
+                # Display all matches
+                display_matches(text, matches, max(len(m) for m in matches))
+            elif len(matches) == 1:
+                completer.matches = [matches[0] + " "]
+            else:
+                completer.matches = []
+                # Ring the bell on no matches
+                sys.stdout.write('\a')
+                sys.stdout.flush()
         else:
             # Path completion
             completer.matches = get_path_completions(text)
-
-         # If no matches found, ring the bell
-        if not completer.matches:
-            sys.stdout.write('\a')
-            sys.stdout.flush()
+            if not completer.matches:
+                sys.stdout.write('\a')
+                sys.stdout.flush()
     
     return completer.matches[state] if state < len(completer.matches) else None
 
