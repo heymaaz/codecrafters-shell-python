@@ -16,23 +16,27 @@ def main():
         userInput:str = input()
         command, parameter = parseInput(userInput)
 
-        if "1>" in parameter:
-            parts = parameter.split("1>", 1)
-            parameter = parts[0].strip()
-            toFile = parts[1].strip()
+        seps = ['1>>', '>>', '1>']
+        for sep in seps:
+            if sep in parameter:
+                parts = parameter.split(sep, 1)
+                parameter = parts[0].strip()
+                toFile = parts[1].strip()
+                break   # skip the else block
+        else:           # if loop ends normally without break then
+            if "2>" in parameter:
+                parts = parameter.split("2>", 1)
+                parameter = parts[0].strip()
+                toErrorFile = parts[1].strip()
+                os.makedirs(os.path.dirname(toErrorFile), exist_ok=True)
+                with open(toErrorFile, "a") as file:
+                    print("", end="", file=file)
 
-        elif "2>" in parameter:
-            parts = parameter.split("2>", 1)
-            parameter = parts[0].strip()
-            toErrorFile = parts[1].strip()
-            os.makedirs(os.path.dirname(toErrorFile), exist_ok=True)
-            with open(toErrorFile, "a") as file:
-                print("", end="", file=file)
+            elif ">" in parameter:
+                parts = parameter.split(">", 1)
+                parameter = parts[0].strip()
+                toFile = parts[1].strip()
 
-        elif ">" in parameter:
-            parts = parameter.split(">", 1)
-            parameter = parts[0].strip()
-            toFile = parts[1].strip()
 
         output=""
         # print(f"command: {command} parameter: {parameter}, toFile: {toFile}, output: {output}")
