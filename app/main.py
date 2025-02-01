@@ -34,6 +34,14 @@ def main():
                 print(os.getcwd())
             else:
                 print("pwd: too many arguments")
+        elif command=="cd":
+            if not parameter:
+                os.chdir()
+            else:
+                if(os.path.isdir(f"{parameter}")):
+                    os.chdir(parameter)
+                else:
+                    print(f"cd: {parameter}: No such file or directory")
         else:
             cmd_file = fileFromPath(command,PATH)
             if cmd_file is not None:
