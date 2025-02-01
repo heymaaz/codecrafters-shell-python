@@ -16,9 +16,11 @@ def main():
                     exit(int(parameter))
                 else:
                     exit()
+
             case "echo":
                 print(f"{parameter}")
                 continue
+
             case "type":
                 if parameter:
                     cmd = parameter.split(" ")[0]
@@ -30,12 +32,14 @@ def main():
                     else:
                         print(f"{cmd} not found")
                     continue
+
             case "pwd":
                 if not parameter:
                     print(os.getcwd())
                 else:
                     print("pwd: too many arguments")
                 continue
+
             case "cd":
                 if not parameter or parameter=="~":
                     os.chdir(os.getenv("HOME"))
@@ -45,6 +49,7 @@ def main():
                     else:
                         print(f"cd: {parameter}: No such file or directory")
                 continue
+
             case _:
                 cmd_file = fileFromPath(command,PATH)
                 if cmd_file is not None:
@@ -66,7 +71,7 @@ def parseQuotes(parameter):
     retStr=""
     i=0
     while i < len(parameter):
-        if parameter[i:i+1]=="\"":
+        if not inSQ and parameter[i:i+1]=="\"":
             inDQ = not inDQ
             i = i+1
             continue
@@ -74,7 +79,7 @@ def parseQuotes(parameter):
             inSQ = not inSQ
             i = i+1
             continue
-        if parameter[i:i+1]=="\\":
+        if parameter[i:i+1]=="\\" and not inSQ:
             i = i+1
             if i < len(parameter):
                 retStr = retStr + parameter[i:i+1]
