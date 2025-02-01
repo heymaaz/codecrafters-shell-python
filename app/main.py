@@ -72,6 +72,21 @@ def parseSingleQuotes(parameter):
             retStr = retStr + parameter[i:i+1]
     return retStr    
 
+def parseDoubleQuotes(parameter):
+    inDQ = False
+    retStr=""
+    for i in range(len(parameter)):
+        if parameter[i:i+1]=="\"":
+            inDQ = not inDQ
+            continue
+        if inDQ:
+            retStr = retStr + parameter[i:i+1]
+        else:
+            if parameter[i:i+1] == " " and retStr[len(retStr)-1:] == " ":
+                continue
+            retStr = retStr + parameter[i:i+1]
+    return retStr    
+
 def fileFromPath(cmd,PATH):
     cmd_path = None
     paths = PATH.split(":")
