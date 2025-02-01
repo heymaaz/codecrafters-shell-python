@@ -53,8 +53,24 @@ def parseInput(command):
     parameter=""
     if(command.find(" ")>=0):
         parameter = command[1+command.find(" "):]
+        parameter = parseSingleQuotes(parameter)
         command = command[0:command.find(" ")]
     return command,parameter
+
+def parseSingleQuotes(parameter):
+    inSQ = False
+    retStr=""
+    for i in range(len(parameter)):
+        if parameter[i:i+1]=="\'":
+            inSQ = not inSQ
+            continue
+        if inSQ:
+            retStr = retStr + parameter[i:i+1]
+        else:
+            if parameter[i:i+1] == " " and retStr[len(retStr)-1:] == " ":
+                continue
+            retStr = retStr + parameter[i:i+1]
+    return retStr    
 
 def fileFromPath(cmd,PATH):
     cmd_path = None
