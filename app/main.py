@@ -1,14 +1,15 @@
 import sys
 import os
+from typing import Tuple
 
 def main():
-    PATH=os.environ.get("PATH")
+    PATH:str = os.environ.get("PATH")
     while True:
         sys.stdout.write("$ ")
 
         # Wait for user input
 
-        userInput = input()
+        userInput:str = input()
         command, parameter = parseInput(userInput)
         match command:
             case "exit":
@@ -57,15 +58,24 @@ def main():
                 else:
                     print(f"{command}: command not found")
 
-def parseInput(command):
-    parameter=""
-    if(command.find(" ")>=0):
-        parameter = command[1+command.find(" "):]
-        parameter = parseQuotes(parameter)
-        command = command[0:command.find(" ")]
-    return command,parameter
+def parseInput(userInput:str) -> Tuple[str, str]: 
+    parameter = ""
+    command = userInput
+    userInput = userInput.strip()
+    if userInput[0:1]=="\"" or userInput[0:1]=="\'":
+        command=userInput[1:userInput.index(userInput[0:1],1)]
+        if 2+len(command) < len(userInput):
+            parameter=userInput[2+len(command):].strip()
+            parameter = parseQuotes(parameter)
+        return command,parameter
+    else:
+        if(userInput.find(" ")>=0):
+            parameter = userInput[1+userInput.find(" "):]
+            parameter = parseQuotes(parameter)
+            command = userInput[0:userInput.find(" ")]
+        return command,parameter
 
-def parseQuotes(parameter):
+def parseQuotes(parameter:str) -> str:
     inDQ = False
     inSQ = False
     retStr=""
@@ -95,7 +105,7 @@ def parseQuotes(parameter):
         i = i+1
     return retStr    
 
-def fileFromPath(cmd,PATH):
+def fileFromPath(cmd:str, PATH:str) -> (str|None):
     cmd_path = None
     paths = PATH.split(":")
     for path in paths:
