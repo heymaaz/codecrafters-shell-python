@@ -35,8 +35,8 @@ def main():
             else:
                 print("pwd: too many arguments")
         elif command=="cd":
-            if not parameter:
-                os.chdir()
+            if not parameter or parameter=="~":
+                os.chdir(os.getenv("HOME"))
             else:
                 if(os.path.isdir(f"{parameter}")):
                     os.chdir(parameter)
