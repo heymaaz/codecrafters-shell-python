@@ -53,7 +53,7 @@ def parseInput(command):
     parameter=""
     if(command.find(" ")>=0):
         parameter = command[1+command.find(" "):]
-        parameter = parseSingleQuotes(parameter)
+        parameter = parseDoubleQuotes(parseSingleQuotes(parameter))
         command = command[0:command.find(" ")]
     return command,parameter
 
