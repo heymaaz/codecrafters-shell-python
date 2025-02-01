@@ -6,11 +6,23 @@ def main():
     PATH:str = os.environ.get("PATH")
     while True:
         sys.stdout.write("$ ")
+        sys.stdout.flush()
 
-        # Wait for user input
-
+        toFile=None
         userInput:str = input()
         command, parameter = parseInput(userInput)
+        if "1>" in parameter:
+            parts = parameter.split("1>", 1)
+            parameter = parts[0].strip()
+            toFile = parts[1].strip()
+
+        elif ">" in parameter:
+            parts = parameter.split(">", 1)
+            parameter = parts[0].strip()
+            toFile = parts[1].strip()
+
+        output=""
+        # print(f"command: {command} parameter: {parameter}, toFile: {toFile}, output: {output}")
         match command:
             case "exit":
                 if parameter:
@@ -19,27 +31,24 @@ def main():
                     exit()
 
             case "echo":
-                print(f"{parameter}")
-                continue
+                output=f"{parameter}\n"
 
             case "type":
                 if parameter:
                     cmd = parameter.split(" ")[0]
                     cmd_path = fileFromPath(cmd,PATH)
                     if cmd in ['echo', 'type', 'exit', 'pwd']:
-                        print(f"{cmd} is a shell builtin")
+                        output = f"{cmd} is a shell builtin\n"
                     elif cmd_path is not None:
-                        print(f"{cmd} is {cmd_path}")
+                        output = f"{cmd} is {cmd_path}\n"
                     else:
-                        print(f"{cmd} not found")
-                    continue
+                        output = f"{cmd} not found\n"
 
             case "pwd":
                 if not parameter:
-                    print(os.getcwd())
+                    output = f"{os.getcwd()}\n"
                 else:
-                    print("pwd: too many arguments")
-                continue
+                    output = "pwd: too many arguments\n"
 
             case "cd":
                 if not parameter or parameter=="~":
@@ -48,15 +57,22 @@ def main():
                     if(os.path.isdir(f"{parameter}")):
                         os.chdir(parameter)
                     else:
-                        print(f"cd: {parameter}: No such file or directory")
-                continue
+                        output = f"cd: {parameter}: No such file or directory\n"
 
             case _:
                 cmd_file = fileFromPath(command,PATH)
                 if cmd_file is not None:
                     os.system(userInput)
                 else:
-                    print(f"{command}: command not found")
+                    output = f"{command}: command not found\n"
+        
+        if not toFile:
+            if output:
+                print(output, end="")
+        else:
+            os.makedirs(os.path.dirname(toFile), exist_ok=True)
+            with open(toFile, "a") as file:
+                print(output, end="", file=file)
 
 def parseInput(userInput:str) -> Tuple[str, str]: 
     parameter = ""
