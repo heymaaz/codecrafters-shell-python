@@ -76,19 +76,30 @@ def parseQuotes(parameter):
     inDQ = False
     inSQ = False
     retStr=""
-    for i in range(len(parameter)):
+    i=0
+    while i < len(parameter):
         if parameter[i:i+1]=="\"":
             inDQ = not inDQ
+            i = i+1
             continue
         if not inDQ and parameter[i:i+1]=="\'":
             inSQ = not inSQ
+            i = i+1
+            continue
+        if parameter[i:i+1]=="\\":
+            i = i+1
+            if i < len(parameter):
+                retStr = retStr + parameter[i:i+1]
+            i = i+1
             continue
         if inDQ or inSQ:
             retStr = retStr + parameter[i:i+1]
         else:
             if parameter[i:i+1] == " " and retStr[len(retStr)-1:] == " ":
+                i = i+1
                 continue
             retStr = retStr + parameter[i:i+1]
+        i = i+1
     return retStr    
 
 def fileFromPath(cmd,PATH):
