@@ -1,12 +1,78 @@
 import sys
 import os
+import readline
 from typing import Tuple
 
 class MyCustomError(Exception):
     pass
 
+builtin = ["echo", "exit", "type", "pwd", "cd"]
+
+def get_commands(PATH):
+    """Get all available commands from PATH"""
+    commands = set(builtin)
+    for path in PATH.split(':'):
+        if os.path.isdir(path):
+            commands.update(os.listdir(path))
+    return commands
+
+def get_path_completions(text):
+    """Get completions for file/directory paths"""
+    if text.startswith('/'):
+        base_path = os.path.dirname(text) or '/'
+        partial = os.path.basename(text)
+    else:
+        base_path = '.'
+        partial = text
+
+    try:
+        return [f"{os.path.join(base_path, item)}" 
+                for item in os.listdir(base_path)
+                if item.startswith(partial)]
+    except OSError:
+        return []
+
+def completer(text, state):
+    """Enhanced autocomplete function for commands and paths"""
+    if state == 0:
+        # First time called for this text, build the matches list
+        if not text or text[0] not in ['/', '.']:
+            # Command completion
+            commands = get_commands(os.environ.get("PATH", ""))
+            # completer.matches = [cmd for cmd in commands if cmd.startswith(text)]
+            completer.matches = [f"{cmd} " for cmd in commands if cmd.startswith(text)]
+        else:
+            # Path completion
+            completer.matches = get_path_completions(text)
+    
+    return completer.matches[state] if state < len(completer.matches) else None
+
+def setup_readline():
+    """Configure readline with proper settings"""
+    # Set up readline for different platforms
+    if sys.platform == 'darwin':  # macOS
+        readline.parse_and_bind("bind ^I rl_complete")
+    else:  # Linux and others
+        readline.parse_and_bind("tab: complete")
+    
+    # Set completion settings
+    readline.set_completer(completer)
+    readline.set_completer_delims(' \t\n;')
+    
+    # Make completion case-insensitive
+    readline.parse_and_bind("set completion-ignore-case on")
+    
+    # Show all completions if ambiguous
+    readline.parse_and_bind("set show-all-if-ambiguous on")
+
 def main():
-    PATH:str = os.environ.get("PATH")
+    PATH = os.environ.get("PATH")
+    HOME = os.environ.get("HOME")
+    
+    # Set up enhanced autocomplete
+    setup_readline()
+
+
     while True:
         sys.stdout.write("$ ")
         sys.stdout.flush()
@@ -50,7 +116,7 @@ def main():
                     if parameter:
                         cmd = parameter.split(" ")[0]
                         cmd_path = fileFromPath(cmd,PATH)
-                        if cmd in ['echo', 'type', 'exit', 'pwd']:
+                        if cmd in builtin:
                             output = f"{cmd} is a shell builtin\n"
                         elif cmd_path is not None:
                             output = f"{cmd} is {cmd_path}\n"
@@ -67,7 +133,7 @@ def main():
 
                 case "cd":
                     if not parameter or parameter=="~":
-                        os.chdir(os.getenv("HOME"))
+                        os.chdir(HOME)
                     else:
                         if(os.path.isdir(f"{parameter}")):
                             os.chdir(parameter)
